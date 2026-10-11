@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local runtime data
+*.db
+*.sqlite3
+*.sqlite
+storage/
+output/
+logs/
+*.log
+*.zip
+
+# Secrets / env files
+.env
+.env.*
+!.env.example
+
+# Deployment / hosting cache
+.vercel/
+.render/
+.vercel/output/
+.vercel/cache/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

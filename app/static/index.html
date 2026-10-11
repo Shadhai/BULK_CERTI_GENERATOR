@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Bulk Certificate Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Montserrat:wght@500;600;700&family=Great+Vibes&display=swap"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <!-- Icon sprite -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></symbol>
+      <symbol id="i-list" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2M9 12h6M9 16h4"/></symbol>
+      <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></symbol>
+      <symbol id="i-retry" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+      <symbol id="i-seal" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 21l5-3 5 3-1.5-7"/></symbol>
+    </svg>
+
+    <main class="shell">
+      <header class="hero">
+        <div class="brand">
+          <span class="brand-mark"><svg class="i"><use href="#i-seal" /></svg></span>
+          Certificates
+        </div>
+        <h1>Bulk Certificate Generator</h1>
+        <p class="hero-sub">
+          Add your recipients, set the course details, and download every
+          certificate as a single ZIP. Handles thousands of names at once.
+        </p>
+      </header>
+
+      <div class="layout">
+        <div class="flow">
+          <!-- Step 1 -->
+          <section class="card" id="step-recipients">
+            <div class="step-head">
+              <span class="step-num"><span class="n">1</span><svg class="i"><use href="#i-check" /></svg></span>
+              <h2>Add recipients</h2>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Recipient input method">
+              <button type="button" role="tab" data-tab="table" class="tab active"><svg class="i"><use href="#i-table" /></svg>Fill a table</button>
+              <button type="button" role="tab" data-tab="paste" class="tab"><svg class="i"><use href="#i-list" /></svg>Paste a list</button>
+              <button type="button" role="tab" data-tab="json" class="tab"><svg class="i"><use href="#i-braces" /></svg>Paste JSON</button>
+              <button type="button" role="tab" data-tab="upload" class="tab"><svg class="i"><use href="#i-upload" /></svg>Upload CSV</button>
+            </div>
+
+            <div class="tab-panel active" data-panel="table">
+              <div class="table-wrap">
+                <table class="editable" aria-label="Recipient table">
+                  <thead>
+                    <tr>
+                      <th class="col-idx">#</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th class="col-remove"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="draft-body"></tbody>
+                </table>
+              </div>
+              <div class="row-gap">
+                <button type="button" class="ghost" id="btn-add-row"><svg class="i"><use href="#i-plus" /></svg>Add row</button>
+                <button type="button" class="ghost" id="btn-add-10">Add 10 rows</button>
+                <button type="button" class="ghost" id="btn-clear-table">Clear table</button>
+              </div>
+            </div>
+
+            <div class="tab-panel" data-panel="paste">
+              <label class="field">
+                <span>One recipient per line <small>(name, then optional email, separated by | , or tab)</small></span>
+                <textarea id="paste-area" rows="10" spellcheck="false" placeholder="Alice Example | alice@example.com&#10;Bob Example | bob@example.com&#10;Carol Example"></textarea>
+              </label>
+              <div class="row-gap">
+                <button type="button" class="ghost" id="btn-load-sample">Load sample</button>
+                <button type="button" class="ghost" id="btn-load-large">Load 5,000 rows</button>
+                <button type="button" class="ghost" id="btn-clear-paste">Clear</button>
+              </div>
+            </div>
+
+            <div class="tab-panel" data-panel="json">
+              <label class="field">
+                <span>JSON array of recipients</span>
+                <textarea id="json-area" rows="10" spellcheck="false" placeholder='[{"name":"Alice Example","email":"alice@example.com"},{"name":"Bob Example"}]'></textarea>
+              </label>
+              <div class="row-gap">
+                <button type="button" class="ghost" id="btn-load-json-sample">Load sample</button>
+                <button type="button" class="ghost" id="btn-clear-json">Clear</button>
+              </div>
+            </div>
+
+            <div class="tab-panel" data-panel="upload">
+              <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload CSV file">
+                <div class="dropzone-icon"><svg class="i"><use href="#i-upload" /></svg></div>
+                <div class="dropzone-text" id="dropzone-text">Click to choose a CSV, or drop it here</div>
+                <input type="file" id="file-input" accept=".csv,text/csv" hidden />
+              </div>
+              <div class="row-gap">
+                <button type="button" class="ghost" id="btn-download-template"><svg class="i"><use href="#i-download" /></svg>Download CSV template</button>
+                <button type="button" class="ghost" id="btn-clear-file">Clear file</button>
+              </div>
+            </div>
+
+            <div id="preview" class="preview warn" role="status" aria-live="polite">
+              <span class="preview-icon">!</span>
+              <span class="preview-text">No recipients yet. Add a list to continue.</span>
+            </div>
+          </section>
+
+          <!-- Step 2 -->
+          <section class="card" id="step-details">
+            <div class="step-head">
+              <span class="step-num"><span class="n">2</span><svg class="i"><use href="#i-check" /></svg></span>
+              <h2>Certificate details</h2>
+            </div>
+
+            <div class="grid-2">
+              <label class="field">
+                <span>Course name</span>
+                <input type="text" id="course-name" maxlength="200" value="Python Fundamentals" placeholder="Python Fundamentals" />
+              </label>
+
+              <label class="field">
+                <span>Issue date</span>
+                <input type="date" id="issue-date" value="2024-03-01" />
+              </label>
+            </div>
+
+            <details class="advanced">
+              <summary>Advanced options <small>(optional)</small></summary>
+              <div class="grid-2" style="margin-top: 4px;">
+                <label class="field">
+                  <span>Instructor or signatory</span>
+                  <input type="text" id="instructor" maxlength="120" placeholder="Dr. Jane Smith" />
+                </label>
+                <label class="field">
+                  <span>Certificate title</span>
+                  <input type="text" id="cert-title" maxlength="120" placeholder="Certificate of Completion" />
+                </label>
+              </div>
+            </details>
+          </section>
+
+          <!-- Step 3: design -->
+          <section class="card" id="step-design">
+            <div class="step-head">
+              <span class="step-num"><span class="n">3</span><svg class="i"><use href="#i-check" /></svg></span>
+              <h2>Choose a design</h2>
+              <button type="button" class="ghost tiny" id="btn-reset-design" style="margin-left:auto"><svg class="i"><use href="#i-retry" /></svg>Reset</button>
+            </div>
+
+            <div class="group">
+              <h3 class="group-title" id="tpl-label">Template</h3>
+              <div class="tpl-grid" id="tpl-grid" role="radiogroup" aria-labelledby="tpl-label"></div>
+            </div>
+
+            <div class="group">
+              <h3 class="group-title" id="font-label">Font style</h3>
+              <div class="font-grid" id="font-grid" role="radiogroup" aria-labelledby="font-label"></div>
+            </div>
+
+            <div class="group">
+              <h3 class="group-title" id="size-label">Text size</h3>
+              <div class="pill-row" id="size-presets" role="group" aria-labelledby="size-label"></div>
+              <div class="slider-row">
+                <label for="text-scale">Body text</label>
+                <input type="range" id="text-scale" min="80" max="120" step="5" value="100" />
+                <output id="text-scale-out" for="text-scale">100%</output>
+              </div>
+              <div class="slider-row">
+                <label for="name-scale">Recipient name</label>
+                <input type="range" id="name-scale" min="80" max="125" step="5" value="100" />
+                <output id="name-scale-out" for="name-scale">100%</output>
+              </div>
+            </div>
+          </section>
+
+          <!-- Step 4 -->
+          <section class="card" id="step-review">
+            <div class="step-head">
+              <span class="step-num"><span class="n">4</span><svg class="i"><use href="#i-check" /></svg></span>
+              <h2>Review and generate</h2>
+            </div>
+
+            <p class="review-summary" id="review-summary">
+              Add recipients in step 1 to see a preview here.
+            </p>
+
+            <div class="table-wrap">
+              <table class="preview-table" id="review-table" hidden>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody id="review-body"></tbody>
+              </table>
+            </div>
+
+            <p class="muted" id="review-more" hidden></p>
+
+            <p class="design-summary" id="design-summary"></p>
+
+            <hr />
+
+            <div class="grid-2">
+              <label class="field">
+                <span>API key <small>(leave blank if auth is off)</small></span>
+                <input type="password" id="api-key" autocomplete="off" placeholder="Leave blank in local dev" />
+              </label>
+              <div class="field" style="align-self:end;">
+                <span class="estimate" id="estimate">Estimated: 2 sec</span>
+              </div>
+            </div>
+
+            <button type="button" class="primary big" id="btn-submit" disabled>
+              <span class="spinner" aria-hidden="true"></span>
+              <span class="label">Generate certificates</span>
+            </button>
+
+            <p class="error" id="form-error" role="alert" hidden></p>
+          </section>
+
+          <!-- Step 5 -->
+          <section class="card" id="step-results" hidden>
+            <div class="step-head">
+              <span class="step-num"><span class="n">5</span><svg class="i"><use href="#i-check" /></svg></span>
+              <h2>Progress and results</h2>
+              <span class="badge badge-idle" id="status-badge">idle</span>
+            </div>
+
+            <div class="job-id-row" id="job-id-row" hidden>
+              <span class="muted">Job ID</span>
+              <code id="job-id-text"></code>
+              <button type="button" class="ghost tiny" id="btn-copy-job-id"><svg class="i"><use href="#i-copy" /></svg><span class="label">Copy</span></button>
+            </div>
+
+            <div class="progress-wrap" id="progress-wrap" hidden>
+              <div class="progress-bar" role="progressbar" aria-label="Generation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+              <div class="progress-label" id="progress-label" aria-live="polite">0 / 0 (0%)</div>
+            </div>
+
+            <div class="counts" id="counts" hidden>
+              <div class="count count-total"><span class="count-label">Total</span><span class="count-value" data-count="total">0</span></div>
+              <div class="count count-pending"><span class="count-label">Pending</span><span class="count-value" data-count="pending">0</span></div>
+              <div class="count count-success"><span class="count-label">Success</span><span class="count-value" data-count="success">0</span></div>
+              <div class="count count-failed"><span class="count-label">Failed</span><span class="count-value" data-count="failed">0</span></div>
+              <div class="count count-invalid"><span class="count-label">Invalid</span><span class="count-value" data-count="invalid">0</span></div>
+            </div>
+
+            <div class="actions-row" id="actions-row" hidden>
+              <a id="btn-download-zip" class="primary" href="#" download hidden><svg class="i"><use href="#i-download" /></svg>Download ZIP</a>
+              <button type="button" class="ghost" id="btn-download-csv"><svg class="i"><use href="#i-download" /></svg>Download CSV report</button>
+              <button type="button" class="ghost" id="btn-retry" hidden><svg class="i"><use href="#i-retry" /></svg>Retry failed rows</button>
+            </div>
+
+            <div class="filters" id="filters" hidden>
+              <div class="filter-tabs" role="group" aria-label="Filter by status">
+                <button type="button" class="chip active" data-filter="all">All</button>
+                <button type="button" class="chip" data-filter="success">Success</button>
+                <button type="button" class="chip" data-filter="failed">Failed</button>
+                <button type="button" class="chip" data-filter="invalid">Invalid</button>
+                <button type="button" class="chip" data-filter="pending">Pending</button>
+              </div>
+              <input type="search" id="search" class="search" placeholder="Search by name or email" aria-label="Search results" />
+            </div>
+
+            <div class="table-wrap">
+              <table class="recipients" id="results-table" hidden>
+                <thead>
+                  <tr>
+                    <th class="col-idx">#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Result</th>
+                  </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+              </table>
+            </div>
+
+            <div class="pagination" id="pagination" hidden>
+              <button type="button" class="ghost" id="btn-page-prev">Previous</button>
+              <span class="page-info" id="page-info">Page 1 of 1</span>
+              <button type="button" class="ghost" id="btn-page-next">Next</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Live certificate preview -->
+        <aside class="side" aria-label="Certificate preview">
+          <div class="side-card" id="cert-card">
+            <div class="side-head">
+              <h2>Live preview</h2>
+              <div class="cert-nav">
+                <button type="button" class="icon-btn" id="cert-prev" aria-label="Previous recipient" disabled><svg class="i"><use href="#i-left" /></svg></button>
+                <span id="cert-counter">Sample</span>
+                <button type="button" class="icon-btn" id="cert-next" aria-label="Next recipient" disabled><svg class="i"><use href="#i-right" /></svg></button>
+              </div>
+            </div>
+
+            <div class="cert" id="cert-preview" data-template="classic">
+              <span class="cert-deco" aria-hidden="true"></span>
+              <div class="cert-frame">
+                <p class="cert-title" id="cert-title-out">Certificate of Completion</p>
+                <p class="cert-lead">presented to</p>
+                <p class="cert-name is-placeholder" id="cert-name">Recipient name</p>
+                <p class="cert-lead">for completing</p>
+                <p class="cert-course" id="cert-course">Course name</p>
+                <div class="cert-foot">
+                  <div class="cert-sign"><span id="cert-date">—</span><small>Date</small></div>
+                  <div class="cert-seal" aria-hidden="true"><svg class="i"><use href="#i-seal" /></svg></div>
+                  <div class="cert-sign"><span id="cert-instructor">—</span><small>Signed</small></div>
+                </div>
+              </div>
+            </div>
+            <p class="cert-note">Approximate layout. Your final PDF may differ slightly.</p>
+
+            <dl class="side-stats">
+              <div><dt>Recipients</dt><dd id="side-recipients">0</dd></div>
+              <div><dt>Estimated time</dt><dd id="side-estimate">2 sec</dd></div>
+              <div><dt>Output</dt><dd>PDFs in a ZIP</dd></div>
+            </dl>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <template id="result-row-tpl">
+      <tr>
+        <td class="col-idx"></td>
+        <td class="col-name"></td>
+        <td class="col-email"></td>
+        <td><span class="badge"></span></td>
+        <td class="col-action"></td>
+      </tr>
+    </template>
+
+    <template id="skeleton-row-tpl">
+      <tr class="skeleton" aria-hidden="true">
+        <td><span class="shimmer w-20"></span></td>
+        <td><span class="shimmer w-140"></span></td>
+        <td><span class="shimmer w-180"></span></td>
+        <td><span class="shimmer w-pill"></span></td>
+        <td><span class="shimmer w-70"></span></td>
+      </tr>
+    </template>
+
+    <template id="review-skeleton-tpl">
+      <tr class="skeleton" aria-hidden="true">
+        <td><span class="shimmer w-20"></span></td>
+        <td><span class="shimmer w-140"></span></td>
+        <td><span class="shimmer w-180"></span></td>
+      </tr>
+    </template>
+  </body>
+</html>

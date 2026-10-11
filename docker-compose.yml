@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    container_name: bulk-certificate-generator
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      BCG_DATABASE_URL: sqlite:///./bcg.db
+      BCG_STORAGE_ROOT: /app/storage
+    volumes:
+      - .:/app
+    restart: unless-stopped
